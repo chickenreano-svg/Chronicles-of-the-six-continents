@@ -1,0 +1,1926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Chronicles of the Six Continents</title>
+
+  <!-- PWA Manifest & Mobile App Meta -->
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#d4af37" />
+  <meta name="description" content="Offline dark-fantasy RPG set across Hanama, Devilborn, Shawn, Matyn, Vish'z, and Byran." />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Six Continents" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+  <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+
+  <style>
+    :root {
+      --bg: #0b0d14;
+      --bg-panel: #131724;
+      --bg-card: #1a2032;
+      --bg-elev: #222940;
+      --gold: #d4af37;
+      --gold-soft: #f0d478;
+      --crimson: #c93b4b;
+      --emerald: #2ea876;
+      --azure: #3b82f6;
+      --purple: #9b6dff;
+      --text: #eef1f8;
+      --muted: #9aa4bf;
+      --border: #2c3552;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      padding-bottom: 78px;
+    }
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(11, 13, 20, 0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 14px;
+    }
+    .top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .brand {
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 0.4px;
+      color: var(--gold);
+    }
+    .pwa-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .badge {
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .badge.ok { border-color: rgba(46,168,118,0.5); color: #6ee7b7; }
+    .badge.warn { border-color: rgba(212,175,55,0.5); color: var(--gold-soft); }
+    .btn {
+      background: var(--bg-elev);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.08s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-gold {
+      background: linear-gradient(135deg, #c99e28, #e6c453);
+      color: #11131b;
+      border-color: #f3da82;
+      font-weight: 700;
+    }
+    .btn-crimson {
+      background: rgba(201, 59, 75, 0.2);
+      border-color: var(--crimson);
+      color: #ff9aa5;
+    }
+    .btn-emerald {
+      background: rgba(46, 168, 118, 0.2);
+      border-color: var(--emerald);
+      color: #86efac;
+    }
+    .btn-sm { padding: 5px 9px; font-size: 0.76rem; }
+    .hidden { display: none !important; }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 12px;
+    }
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .hud-box {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 10px;
+    }
+    .hud-label { font-size: 0.68rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .hud-val { font-size: 0.88rem; font-weight: 700; color: var(--text); margin-top: 1px; }
+
+    .bar-wrap {
+      width: 100%;
+      height: 7px;
+      background: #090b10;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 5px;
+      border: 1px solid #232a42;
+    }
+    .bar-fill { height: 100%; transition: width 0.25s ease; }
+    .bar-hp { background: linear-gradient(90deg, #dc2626, #f87171); }
+    .bar-xp { background: linear-gradient(90deg, #ca8a04, #facc15); }
+    .bar-sync { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+
+    .card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+    .card h2, .card h3 {
+      margin: 0 0 8px 0;
+      color: var(--gold);
+      font-size: 1.05rem;
+    }
+    .sub { color: var(--muted); font-size: 0.84rem; margin-bottom: 10px; }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+
+    .select-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      cursor: pointer;
+    }
+    .select-card.active {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 1px var(--gold);
+      background: #20273d;
+    }
+    input[type="text"], select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text);
+      font-size: 0.92rem;
+    }
+
+    /* Bottom Navigation */
+    nav.bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 45;
+      background: rgba(11, 13, 20, 0.97);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 6px 4px;
+    }
+    .nav-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 6px 2px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .nav-btn.active { color: var(--gold); }
+
+    /* Log Console */
+    .log-box {
+      background: #080a10;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      max-height: 220px;
+      overflow-y: auto;
+      font-size: 0.83rem;
+    }
+    .log-entry { padding: 4px 0; border-bottom: 1px solid rgba(44,53,82,0.4); }
+    .log-entry:last-child { border-bottom: none; }
+    .c-gold { color: var(--gold-soft); }
+    .c-red { color: #f87171; }
+    .c-green { color: #6ee7b7; }
+    .c-blue { color: #93c5fd; }
+    .c-purple { color: #c4b5fd; }
+
+    /* Tier & Special Case Pills */
+    .pill {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      margin-right: 4px;
+    }
+    .t-Normal { background: #262b38; color: #cbd5e1; }
+    .t-Basic { background: #1e3a2f; color: #86efac; }
+    .t-Average { background: #1e3a5f; color: #93c5fd; }
+    .t-AboveAverage { background: #2e2963; color: #c4b5fd; }
+    .t-Elite { background: #4a2559; color: #f0abfc; }
+    .t-MastersChoice { background: #5c3317; color: #fdba74; }
+    .t-GrandmastersChoice { background: #6b2128; color: #fda4af; }
+    .t-Legendary { background: #5c4812; color: #fde047; border: 1px solid #eab308; }
+    .t-Mythical { background: linear-gradient(90deg, #581c87, #991b1b); color: #fef08a; border: 1px solid #f59e0b; }
+
+    .sp-Possessed { background: #3b0764; color: #e879f9; border: 1px solid #a855f7; }
+    .sp-Shiny { background: #164e63; color: #67e8f9; border: 1px solid #06b6d4; }
+    .sp-Burning { background: #7c2d12; color: #fdba74; border: 1px solid #f97316; }
+    .sp-Corrupted { background: #450a0a; color: #fca5a5; border: 1px solid #ef4444; }
+
+    /* SVG Map */
+    .map-wrap {
+      background: #070b14;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+    }
+    svg#worldMap {
+      width: 100%;
+      height: auto;
+      display: block;
+      touch-action: manipulation;
+    }
+    .map-node { cursor: pointer; transition: opacity 0.15s; }
+    .map-node:hover { opacity: 0.85; }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 6, 10, 0.82);
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+    }
+    .modal-panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--gold);
+      border-radius: 12px;
+      max-width: 540px;
+      width: 100%;
+      max-height: 86vh;
+      overflow-y: auto;
+      padding: 16px;
+    }
+    .monster-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(201, 59, 75, 0.5);
+      border-radius: 8px;
+      padding: 9px;
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="top-row">
+    <div class="brand">⚔️ CHRONICLES OF THE SIX CONTINENTS</div>
+    <div class="pwa-bar">
+      <span id="offlineBadge" class="badge ok">● Offline Ready</span>
+      <button id="btnInstallPwa" class="btn btn-gold btn-sm hidden">⬇ Install App</button>
+      <button id="btnPwaHelp" class="btn btn-sm">📱 App Info</button>
+      <button id="btnSaveMenu" class="btn btn-sm hidden">💾 Saves</button>
+    </div>
+  </div>
+  <div id="hudPanel" class="hud hidden">
+    <div class="hud-box">
+      <div class="hud-label">Adventurer & Guild</div>
+      <div class="hud-val" id="hudIdentity">—</div>
+    </div>
+    <div class="hud-box">
+      <div class="hud-label">Level & Classes</div>
+      <div class="hud-val" id="hudLevel">—</div>
+      <div class="bar-wrap"><div id="hudXpBar" class="bar-fill bar-xp" style="width:0%"></div></div>
+    </div>
+    <div class="hud-box">
+      <div class="hud-label">Age & Shift Clock</div>
+      <div class="hud-val" id="hudAgeTime">—</div>
+    </div>
+    <div class="hud-box">
+      <div class="hud-label">Location & Gold</div>
+      <div class="hud-val" id="hudLocGold">—</div>
+    </div>
+    <div class="hud-box">
+      <div class="hud-label">Vitality (Party Avg)</div>
+      <div class="hud-val" id="hudHp">—</div>
+      <div class="bar-wrap"><div id="hudHpBar" class="bar-fill bar-hp" style="width:100%"></div></div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <!-- CHARACTER CREATION SCREEN -->
+  <section id="screenCreate">
+    <div class="card">
+      <h2>Register at a Hanama Guild</h2>
+      <p class="sub">Under the <strong>Laws of the Heroes</strong>, no citizen may enter a dungeon without belonging to a guild. All five legendary guilds operate on <strong>Hanama Continent</strong>, each strictly capped at <strong>1 Guildmaster, 1 Vice Guildmaster, 7 Weaponsmiths, 8 Receptionists, and 3 Treasurers</strong>.</p>
+      <label class="hud-label">Adventurer Name</label>
+      <input type="text" id="inputHeroName" placeholder="Enter your adventurer name..." value="Kaelen Vance" maxlength="28" />
+    </div>
+
+    <div class="card">
+      <h3>1. Choose One of the Big 5 Guilds (Hanama Continent)</h3>
+      <div id="guildChoices" class="grid-2"></div>
+    </div>
+
+    <div class="card">
+      <h3>2. Choose Starting Combat Class</h3>
+      <p class="sub">There are no F–S letter ranks—only your numerical Level. You can add or switch classes later, though splitting focus slows leveling and risks aging toward <strong>Age 76 at Level 56</strong>.</p>
+      <div id="classChoices" class="grid-3"></div>
+    </div>
+
+    <div class="card" style="text-align:center;">
+      <button id="btnStartAdventure" class="btn btn-gold" style="width:100%; padding:12px; font-size:1rem;">Swear Guild Oath & Begin at Age 18y 0m 0w</button>
+    </div>
+  </section>
+
+  <!-- MAIN GAME SCREEN -->
+  <main id="screenGame" class="hidden">
+    <!-- TAB 1: WORLD ATLAS -->
+    <section id="tabMap" class="tab-view">
+      <div class="card">
+        <div class="top-row" style="margin-bottom:8px;">
+          <h2 style="margin:0;">World Atlas of the Six Continents</h2>
+          <div style="display:flex; gap:5px; flex-wrap:wrap;">
+            <button class="btn btn-sm map-filter active" data-filter="all">All</button>
+            <button class="btn btn-sm map-filter" data-filter="continent">Continents</button>
+            <button class="btn btn-sm map-filter" data-filter="water">Seas & Lakes</button>
+            <button class="btn btn-sm map-filter" data-filter="settlement">Guilds & Villages</button>
+          </div>
+        </div>
+        <div class="map-wrap">
+          <svg id="worldMap" viewBox="0 0 820 470" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="oceanGrad" cx="50%" cy="50%" r="70%">
+                <stop offset="0%" stop-color="#0f1b33"/>
+                <stop offset="100%" stop-color="#060911"/>
+              </radialGradient>
+            </defs>
+            <rect width="820" height="470" fill="url(#oceanGrad)"/>
+            <!-- Grid lines -->
+            <g stroke="#18243f" stroke-width="1" stroke-dasharray="4 4">
+              <line x1="0" y1="115" x2="820" y2="115"/>
+              <line x1="0" y1="235" x2="820" y2="235"/>
+              <line x1="0" y1="355" x2="820" y2="355"/>
+              <line x1="205" y1="0" x2="205" y2="470"/>
+              <line x1="410" y1="0" x2="410" y2="470"/>
+              <line x1="615" y1="0" x2="615" y2="470"/>
+            </g>
+
+            <!-- SEAS & LAKES LABELS -->
+            <g class="layer-water" fill="#5da9e9" font-size="10" font-style="italic" opacity="0.88">
+              <text x="345" y="135">~ Frostbite Strait ~</text>
+              <text x="175" y="245">~ The Sundered Sea ~</text>
+              <text x="485" y="210">~ Abyssal Maw ~</text>
+              <text x="180" y="385">~ Tempest Ocean ~</text>
+              <text x="355" y="425">~ Thousand-Isle Sea ~</text>
+              <text x="535" y="395">~ Ashfall Sea ~</text>
+            </g>
+
+            <!-- 1. MATYN CONTINENT (Top Left - Coldest, Highest Population) -->
+            <g class="map-node layer-continent" data-loc="Matyn">
+              <path d="M45,42 L195,32 L245,78 L225,138 L145,155 L65,132 L38,85 Z" fill="#1e3a5f" stroke="#60a5fa" stroke-width="2"/>
+              <text x="95" y="72" fill="#dbeafe" font-weight="bold" font-size="13">MATYN CONTINENT</text>
+              <text x="88" y="87" fill="#93c5fd" font-size="9">Coldest • Highest Pop.</text>
+              <ellipse class="layer-water" cx="165" cy="112" rx="22" ry="9" fill="#38bdf8" opacity="0.7"/>
+              <text class="layer-water" x="135" y="129" fill="#bae6fd" font-size="8.5">Glacial Lake Vostok</text>
+            </g>
+
+            <!-- 2. HANAMA CONTINENT (Center - Big 5 Guilds + Dungeon of Death) -->
+            <g class="map-node layer-continent" data-loc="Hanama">
+              <path d="M275,155 L425,145 L465,205 L440,285 L340,295 L268,245 Z" fill="#27332b" stroke="#d4af37" stroke-width="2.4"/>
+              <text x="312" y="178" fill="#fef08a" font-weight="bold" font-size="13">HANAMA CONTINENT</text>
+              <text x="310" y="192" fill="#d4af37" font-size="9">Seat of the Big 5 Guilds</text>
+              <ellipse class="layer-water" cx="322" cy="245" rx="18" ry="8" fill="#38bdf8" opacity="0.75"/>
+              <text class="layer-water" x="296" y="261" fill="#bae6fd" font-size="8.5">Mirror Lake</text>
+            </g>
+
+            <!-- 3. DEVILBORN CONTINENT (Top Right - Largest, Lethal even at Lv 5000+) -->
+            <g class="map-node layer-continent" data-loc="Devilborn">
+              <path d="M510,25 L775,22 L795,125 L765,228 L630,240 L525,190 L495,105 Z" fill="#3b1219" stroke="#ef4444" stroke-width="2.4"/>
+              <text x="572" y="75" fill="#fecaca" font-weight="bold" font-size="14">DEVILBORN CONTINENT</text>
+              <text x="562" y="92" fill="#f87171" font-size="9.5">Largest • Lethal to Lv 5000+</text>
+              <text x="580" y="110" fill="#fca5a5" font-size="8.5">⚠ Sealed Portal Origin</text>
+            </g>
+
+            <!-- 4. VISH'Z CONTINENT (Bottom Left - Richest, Chaotic Climate) -->
+            <g class="map-node layer-continent" data-loc="Vishz">
+              <path d="M40,275 L185,268 L220,335 L195,425 L80,435 L35,365 Z" fill="#362b47" stroke="#c084fc" stroke-width="2"/>
+              <text x="72" y="310" fill="#f3e8ff" font-weight="bold" font-size="13">VISH'Z CONTINENT</text>
+              <text x="66" y="325" fill="#d8b4fe" font-size="9">Richest • Unstable Climate</text>
+              <ellipse class="layer-water" cx="145" cy="368" rx="20" ry="8" fill="#38bdf8" opacity="0.75"/>
+              <text class="layer-water" x="110" y="385" fill="#bae6fd" font-size="8.5">Gilded Mirage Lake</text>
+            </g>
+
+            <!-- 5. BYRAN CONTINENT (Bottom Center - Smallest, Thousand-Island Archipelago) -->
+            <g class="map-node layer-continent" data-loc="Byran">
+              <circle cx="325" cy="355" r="14" fill="#164e63" stroke="#22d3ee" stroke-width="1.6"/>
+              <circle cx="358" cy="345" r="11" fill="#164e63" stroke="#22d3ee" stroke-width="1.6"/>
+              <circle cx="382" cy="368" r="13" fill="#164e63" stroke="#22d3ee" stroke-width="1.6"/>
+              <circle cx="342" cy="382" r="12" fill="#164e63" stroke="#22d3ee" stroke-width="1.6"/>
+              <circle cx="304" cy="378" r="9" fill="#164e63" stroke="#22d3ee" stroke-width="1.6"/>
+              <text x="292" y="330" fill="#cffafe" font-weight="bold" font-size="12">BYRAN ARCHIPELAGO</text>
+              <text x="295" y="406" fill="#67e8f9" font-size="8.5">Smallest • Fisherman Isles & Pearl Lagoon</text>
+            </g>
+
+            <!-- 6. SHAWN CONTINENT (Bottom Right - Hottest, Dead Continent, ~96 Dungeons) -->
+            <g class="map-node layer-continent" data-loc="Shawn">
+              <path d="M555,278 L755,270 L785,355 L740,435 L585,432 L542,358 Z" fill="#431d12" stroke="#f97316" stroke-width="2"/>
+              <text x="592" y="312" fill="#ffedd5" font-weight="bold" font-size="13">SHAWN CONTINENT</text>
+              <text x="586" y="327" fill="#fdba74" font-size="9">Dead Continent • ~96+ Dungeons</text>
+              <ellipse class="layer-water" cx="685" cy="368" rx="20" ry="8" fill="#fb923c" opacity="0.7"/>
+              <text class="layer-water" x="650" y="385" fill="#fed7aa" font-size="8.5">Boiling Sulfur Lake</text>
+            </g>
+
+            <!-- SETTLEMENTS, GUILDS & LANDMARKS -->
+            <g class="layer-settlement" font-size="8.5" fill="#f8fafc">
+              <!-- Hanama Landmarks -->
+              <circle cx="355" cy="212" r="4.5" fill="#d4af37"/>
+              <text x="363" y="215" fill="#fde047" font-weight="bold">Big 5 Guild Citadel</text>
+              <circle cx="425" cy="235" r="5" fill="#ef4444" stroke="#fff" stroke-width="1"/>
+              <text x="366" y="275" fill="#fca5a5" font-weight="bold">☠ Dungeon of Death</text>
+              <circle cx="295" cy="210" r="3.5" fill="#a7f3d0"/>
+              <text x="275" y="203">Oakhaven</text>
+
+              <!-- Matyn Landmarks -->
+              <circle cx="110" cy="105" r="4" fill="#93c5fd"/>
+              <text x="72" y="102">Frosthelm City</text>
+
+              <!-- Vish'z Landmarks -->
+              <circle cx="95" cy="348" r="4" fill="#e9d5ff"/>
+              <text x="58" y="344">Aurelia Capital</text>
+
+              <!-- Byran Landmarks -->
+              <circle cx="342" cy="362" r="3.5" fill="#67e8f9"/>
+              <text x="396" y="362">Coralhaven</text>
+
+              <!-- Shawn Landmarks -->
+              <circle cx="595" cy="355" r="4" fill="#fdba74"/>
+              <text x="562" y="370">Cinderwatch</text>
+            </g>
+          </svg>
+        </div>
+        <div id="mapInspector" class="card" style="margin-top:10px; margin-bottom:0; background:var(--bg-card);"></div>
+      </div>
+    </section>
+
+    <!-- TAB 2: GUILD HALL & QUESTS -->
+    <section id="tabGuild" class="tab-view hidden">
+      <div class="card">
+        <div class="top-row">
+          <h2 id="guildHallTitle" style="margin:0;">Guild Hall</h2>
+          <span id="guildRosterBadge" class="badge warn">Staff Cap: 1 GM • 1 VGM • 7 Smiths • 8 Rec. • 3 Treas.</span>
+        </div>
+        <p id="guildDialogue" class="sub" style="margin-top:6px; font-style:italic; color:#e2e8f0;"></p>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+          <button id="btnActionTrain" class="btn">⚔️ Intensive Class Training (+1w)</button>
+          <button id="btnActionHelp" class="btn">🤝 Civilian Aid Mission (+1w)</button>
+          <button id="btnActionRest" class="btn btn-emerald">⛺ Rest & Morning Roll-Out Reset</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Main Campaign: 5 Acts & Dungeon of Death (30 Floors)</h3>
+        <div id="storyActBox"></div>
+      </div>
+
+      <div class="card">
+        <h3>Heroes' Law: Blind Dungeon Auction</h3>
+        <p class="sub">Under the Heroes' Charter, Guild Wars are forbidden. Unclaimed dungeons go to public auction after prospective guilds scout only from the <strong>top floor down to the middle floor</strong>.</p>
+        <div id="auctionBox"></div>
+      </div>
+
+      <div class="card">
+        <h3>Class Mastery & Multiclass Registry</h3>
+        <p class="sub">You may add a secondary class or switch classes through your Receptionist. Dividing focus reduces XP efficiency (-20% per extra class) and adds aging strain (+1w per run).</p>
+        <div id="multiclassBox" class="grid-3"></div>
+      </div>
+    </section>
+
+    <!-- TAB 3: DUNGEONS & COMBAT -->
+    <section id="tabDungeon" class="tab-view hidden">
+      <div id="dungeonLobby">
+        <div class="card">
+          <h2>Dungeon Roll-Out Desk</h2>
+          <p class="sub"><strong>Laws of the Heroes:</strong> Morning entries only. Parties of 4–5 from the same guild (Level 900+ required to solo). Equal loot split. Survivors must recover fallen teammates' <strong>Guild Tags</strong> before Nightfall Roll Call.</p>
+          <div id="dodEntryCard" class="select-card active" style="margin-bottom:10px;"></div>
+          <h3>Side Mission Dungeons (Current Continent: <span id="sideDungeonCont">Hanama</span>)</h3>
+          <div id="sideDungeonsList" class="grid-2"></div>
+        </div>
+      </div>
+
+      <div id="dungeonCombat" class="hidden">
+        <div class="card">
+          <div class="top-row">
+            <h2 id="combatTitle" style="margin:0;">Dungeon Floor 1</h2>
+            <span id="combatShiftBadge" class="badge warn">Morning Shift</span>
+          </div>
+          <p id="combatSub" class="sub"></p>
+
+          <div id="monsterList"></div>
+
+          <div id="combatControls" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+            <button id="btnAttackWave" class="btn btn-crimson">⚔️ Party Assault</button>
+            <button id="btnSkillWave" class="btn btn-gold">✨ Coordinated Class Art</button>
+            <button id="btnRetreatEarly" class="btn">🏃 Tactical Retreat to Roll Call</button>
+          </div>
+
+          <div id="floorDecisionBox" class="card hidden" style="margin-top:12px; background:var(--bg-card); border-color:var(--gold);">
+            <h3 style="margin-top:0;">Wave Cleared — Choose Your Next Move</h3>
+            <p class="sub" id="decisionPromptText">Nightfall approaches. Descending deeper increases monster HP and loot tiers, while staying lets you farm safer waves before evening roll call.</p>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button id="btnDecideDeeper" class="btn btn-crimson">⬇ Descend Deeper (Next Floor)</button>
+              <button id="btnDecideFarm" class="btn btn-gold">🔄 Stay & Hunt Weaker Monsters</button>
+              <button id="btnDecideExit" class="btn btn-emerald">🏁 Fall Back & Await Evening Roll Call</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: PARTY & ARMORY -->
+    <section id="tabArmory" class="tab-view hidden">
+      <div class="card">
+        <h2>Same-Guild Party & Artifact Synchronization</h2>
+        <p class="sub">Any tier can be equipped at Level 1, but true power unlocks via <strong>Synchronization %</strong> as you level up, clear dungeons, and help people.</p>
+        <div id="partyCards" class="grid-2"></div>
+      </div>
+
+      <div class="card">
+        <h3>Artifact Vault (<span id="invCount">0</span> Relics)</h3>
+        <div id="inventoryList" class="grid-2"></div>
+      </div>
+    </section>
+
+    <!-- TAB 5: WEAPONSMITH FORGE -->
+    <section id="tabForge" class="tab-view hidden">
+      <div class="card">
+        <h2>Guild Weaponsmiths (7 Master Smiths)</h2>
+        <p class="sub">Smiths can directly forge swords only up to <strong>Above Average</strong>. Higher tiers require monster salvage or <strong>Artifact Combination (Fusion)</strong>—which never downgrades below the combined inputs, and turns two <strong>Legendaries</strong> into a <strong>Special Case</strong> or <strong>Mythical</strong>.</p>
+        <div class="grid-2">
+          <div class="select-card">
+            <h3 style="margin-top:0;">Commission Standard Blade</h3>
+            <p class="sub">Direct forging cap: Normal to Above Average.</p>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <button class="btn btn-sm forge-craft" data-tier="Normal" data-cost="25">Normal (25g)</button>
+              <button class="btn btn-sm forge-craft" data-tier="Basic" data-cost="60">Basic (60g)</button>
+              <button class="btn btn-sm forge-craft" data-tier="Average" data-cost="130">Average (130g)</button>
+              <button class="btn btn-sm forge-craft" data-tier="Above Average" data-cost="260">Above Avg (260g)</button>
+            </div>
+          </div>
+          <div class="select-card">
+            <h3 style="margin-top:0;">Monster Salvage Reforging</h3>
+            <p class="sub">Salvage Cores: <strong id="salvageCount">0</strong> (Dropped by armed dungeon monsters)</p>
+            <button id="btnReforgeSalvage" class="btn btn-gold btn-sm">Reforge 2 Cores into Relic (150g)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Artifact Combination (Fusion Altar)</h3>
+        <p class="sub">Select two unequipped artifacts from your vault to fuse together.</p>
+        <div class="grid-2" style="margin-bottom:10px;">
+          <div>
+            <label class="hud-label">Artifact Slot A</label>
+            <select id="fuseSelectA"></select>
+          </div>
+          <div>
+            <label class="hud-label">Artifact Slot B</label>
+            <select id="fuseSelectB"></select>
+          </div>
+        </div>
+        <button id="btnFuseArtifacts" class="btn btn-gold">🔥 Fuse Selected Artifacts (200g)</button>
+      </div>
+    </section>
+
+    <!-- CHRONICLE LOG -->
+    <div class="card">
+      <div class="top-row" style="margin-bottom:6px;">
+        <h3 style="margin:0;">Adventurer Chronicle</h3>
+        <span class="badge" id="tagsRecoveredBadge">Guild Tags Recovered: 0</span>
+      </div>
+      <div id="gameLog" class="log-box"></div>
+    </div>
+  </main>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav id="bottomNav" class="bottom-nav hidden">
+  <button class="nav-btn active" data-tab="tabMap">🗺️<span>World Map</span></button>
+  <button class="nav-btn" data-tab="tabGuild">🏛️<span>Guild & Acts</span></button>
+  <button class="nav-btn" data-tab="tabDungeon">⚔️<span>Dungeons</span></button>
+  <button class="nav-btn" data-tab="tabArmory">🛡️<span>Party & Gear</span></button>
+  <button class="nav-btn" data-tab="tabForge">🔨<span>Forge</span></button>
+</nav>
+
+<!-- MODAL -->
+<div id="modalBackdrop" class="modal-backdrop hidden">
+  <div class="modal-panel">
+    <div class="top-row" style="margin-bottom:10px;">
+      <h3 id="modalTitle" style="margin:0; color:var(--gold);">Notice</h3>
+      <button id="btnCloseModal" class="btn btn-sm">✕ Close</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  // =========================================================
+  // 1. WORLD LORE & DATA DEFINITIONS
+  // =========================================================
+  const GUILDS = [
+    {
+      id: "Hanmei",
+      name: "Hanmei Guild",
+      motto: "Discipline outlives the blade.",
+      bonus: "+12% XP from training & balanced party defense.",
+      startGold: 180,
+      quote: "Our 8 Receptionists log every morning roll-out to the second. Follow the Heroes' Law and you will live to see Level 100."
+    },
+    {
+      id: "Four Leaf",
+      name: "Four Leaf Guild",
+      motto: "Fortune favors those who return together.",
+      bonus: "+20% Full-Party Survival Bonus & higher Special Case drop luck.",
+      startGold: 160,
+      quote: "Never leave a teammate behind in the dark. Bring every Guild Tag home before nightfall."
+    },
+    {
+      id: "Royal Gilded",
+      name: "Royal Gilded Guild",
+      motto: "Gold buys time; steel buys survival.",
+      bonus: "+140 Starting Gold & -15% Weaponsmith & auction costs.",
+      startGold: 320,
+      quote: "Our 3 Treasurers keep the deepest vaults in Hanama. Outbid rivals at the dungeon auction—never start a forbidden guild war."
+    },
+    {
+      id: "Gaze",
+      name: "Gaze Guild",
+      motto: "See the floor before you step upon it.",
+      bonus: "+15% Critical Class Art damage & deeper auction floor intel.",
+      startGold: 190,
+      quote: "Nobody knows how deep the Dungeon of Death truly goes, or what stirs past the Devilborn portal—so watch every shadow."
+    },
+    {
+      id: "Collector",
+      name: "Collector Guild",
+      motto: "Every relic remembers the Gods.",
+      bonus: "+10% Artifact Synchronization & bonus Monster Salvage cores.",
+      startGold: 170,
+      quote: "Master's Choice, Legendary, Mythical—relics from the War between Gods and Monsters answer only to worthy hands."
+    }
+  ];
+
+  const CLASSES = [
+    { id: "Fighter", role: "Balanced Vanguard", atk: 14, def: 10, hp: 115 },
+    { id: "Warmonger", role: "Relentless Cleaver", atk: 18, def: 7, hp: 110 },
+    { id: "Assassin", role: "Shadow Striker", atk: 20, def: 5, hp: 95 },
+    { id: "Brawler", role: "Close-Quarters Pugilist", atk: 16, def: 9, hp: 112 },
+    { id: "Tank", role: "Iron Bulwark", atk: 8, def: 18, hp: 150 },
+    { id: "Enchanter", role: "Arcane Synchronizer", atk: 11, def: 11, hp: 105 },
+    { id: "Mage", role: "Elemental Weaver", atk: 21, def: 4, hp: 90 },
+    { id: "Marksman", role: "Precision Ranger", atk: 17, def: 7, hp: 100 }
+  ];
+
+  const TIERS = [
+    "Normal",
+    "Basic",
+    "Average",
+    "Above Average",
+    "Elite",
+    "Master's Choice",
+    "Grandmaster's Choice",
+    "Legendary",
+    "Mythical"
+  ];
+
+  const TIER_POWER = {
+    "Normal": 8,
+    "Basic": 14,
+    "Average": 22,
+    "Above Average": 34,
+    "Elite": 52,
+    "Master's Choice": 78,
+    "Grandmaster's Choice": 115,
+    "Legendary": 170,
+    "Mythical": 260
+  };
+
+  const SPECIAL_CASES = [
+    { name: "Possessed", mult: 1.35, note: "+35% Power; whispers spectral instincts." },
+    { name: "Shiny", mult: 1.25, note: "+25% Power; boosts gold & synchronization." },
+    { name: "Burning", mult: 1.32, note: "+32% Power; sears armored monsters." },
+    { name: "Corrupted", mult: 1.42, note: "+42% Power; unstable abyssal surge." }
+  ];
+
+  // 48 Distinct Artifacts across all 9 Tiers
+  const WEAPON_CATALOG = [
+    // Normal (6)
+    { name: "Rust-Nick Shortsword", tier: "Normal" },
+    { name: "Ashwood Bo Staff", tier: "Normal" },
+    { name: "Iron-Tipped Spear", tier: "Normal" },
+    { name: "Recruit's Shortbow", tier: "Normal" },
+    { name: "Wrapped Leather Cestus", tier: "Normal" },
+    { name: "Dented Buckler Blade", tier: "Normal" },
+    // Basic (6)
+    { name: "Tempered Militia Saber", tier: "Basic" },
+    { name: "Oak-Heart Longbow", tier: "Basic" },
+    { name: "Bronze-Studded Gauntlets", tier: "Basic" },
+    { name: "Apprentice Focus Wand", tier: "Basic" },
+    { name: "Kite-Shield & Broadsword", tier: "Basic" },
+    { name: "Serrated Dirk", tier: "Basic" },
+    // Average (6)
+    { name: "Hanama Steel Longsword", tier: "Average" },
+    { name: "Tide-Iron Harpoon", tier: "Average" },
+    { name: "Frost-Forged Hatchet", tier: "Average" },
+    { name: "Runed Copper Staff", tier: "Average" },
+    { name: "Reinforced Tower Mace", tier: "Average" },
+    { name: "Composite Hunter Bow", tier: "Average" },
+    // Above Average (6)
+    { name: "Guildsmith's Masterwork Blade", tier: "Above Average" },
+    { name: "Headless Knight's Salvaged Spear", tier: "Above Average" },
+    { name: "Tempest-Glass Dagger", tier: "Above Average" },
+    { name: "Aurelian Gilded Halberd", tier: "Above Average" },
+    { name: "Cinder-Quenched Knuckles", tier: "Above Average" },
+    { name: "Mirror-Lake Orb & Tome", tier: "Above Average" },
+    // Elite (6)
+    { name: "Vanguard Cleaver of Matyn", tier: "Elite" },
+    { name: "Abyss-Warden Greatshield", tier: "Elite" },
+    { name: "Whisperwind Recurve", tier: "Elite" },
+    { name: "Crimson Oath Katana", tier: "Elite" },
+    { name: "Storm-Caller Scepter", tier: "Elite" },
+    { name: "Dread-Core Warhammers", tier: "Elite" },
+    // Master's Choice (5)
+    { name: "Heaven-Shard Rapier", tier: "Master's Choice" },
+    { name: "Sun-Scorched Greatsword of Shawn", tier: "Master's Choice" },
+    { name: " Leviathan Spine Trident", tier: "Master's Choice" },
+    { name: "Soul-Thread Twin Daggers", tier: "Master's Choice" },
+    { name: "Aegis of the First Reception", tier: "Master's Choice" },
+    // Grandmaster's Choice (5)
+    { name: "Seraphic Judgment Glaive", tier: "Grandmaster's Choice" },
+    { name: "Void-Step Assassin's Fang", tier: "Grandmaster's Choice" },
+    { name: "Glacial Sovereign Greataxe", tier: "Grandmaster's Choice" },
+    { name: "Astral Conduit Grimoire", tier: "Grandmaster's Choice" },
+    { name: "Starfall Longbow", tier: "Grandmaster's Choice" },
+    // Legendary (4)
+    { name: "Dawnbreaker of the Fallen Pantheon", tier: "Legendary" },
+    { name: "Ragnarok Warmonger's Maul", tier: "Legendary" },
+    { name: "Chronicle Aegis of the Heroes", tier: "Legendary" },
+    { name: "Calamity Weaver Staff", tier: "Legendary" },
+    // Mythical (4)
+    { name: "Heaven's Apex: God-Slayer Sovereign", tier: "Mythical" },
+    { name: "Genesis & Ruin Twin Relics", tier: "Mythical" },
+    { name: "Crown-Piercer Longinus", tier: "Mythical" },
+    { name: "Eternity's Unbound Grimoire", tier: "Mythical" }
+  ];
+
+  const CONTINENTS = {
+    Hanama: {
+      name: "Hanama Continent",
+      subtitle: "Political & Martial Heart of Humanity",
+      desc: "Home to the Big 5 Guilds (Hanmei, Four Leaf, Royal Gilded, Gaze, Collector), Oakhaven Village, Mirror Lake, and the Dungeon of Death—the largest dungeon in existence, housing the sealed portal to the Devilborn Continent.",
+      travelCost: 0,
+      travelWeeks: 0,
+      dungeons: [
+        { id: "han_1", name: "Mossfang Hollow", floors: 4, recLv: 1, baseHp: 75, rewardGold: 85, rewardXp: 140 },
+        { id: "han_2", name: "Sunken Watchtower Crypt", floors: 6, recLv: 5, baseHp: 145, rewardGold: 180, rewardXp: 290 }
+      ]
+    },
+    Byran: {
+      name: "Byran Continent (Fisherman Isles)",
+      subtitle: "Smallest Continent • Thousand-Island Archipelago",
+      desc: "Shattered into a thousand islands across the Thousand-Isle Sea and Pearl Lagoon. Fishermen villages like Coralhaven thrive here, though sea-trench dungeons occasionally surface.",
+      travelCost: 45,
+      travelWeeks: 2,
+      dungeons: [
+        { id: "byr_1", name: "Sunken Coral Vault", floors: 5, recLv: 3, baseHp: 110, rewardGold: 135, rewardXp: 210 },
+        { id: "byr_2", name: "Pearl Lagoon Abyssal Trench", floors: 7, recLv: 8, baseHp: 210, rewardGold: 260, rewardXp: 410 }
+      ]
+    },
+    Matyn: {
+      name: "Matyn Continent",
+      subtitle: "Coldest Continent • Highest Human Population",
+      desc: "Across Frostbite Strait lies Matyn—a sub-zero powerhouse sustaining humanity's largest population around Frosthelm City and Glacial Lake Vostok.",
+      travelCost: 70,
+      travelWeeks: 3,
+      dungeons: [
+        { id: "mat_1", name: "Glacier Spire Cavern", floors: 6, recLv: 6, baseHp: 175, rewardGold: 220, rewardXp: 340 },
+        { id: "mat_2", name: "Permafrost Vault of Vostok", floors: 8, recLv: 11, baseHp: 290, rewardGold: 360, rewardXp: 540 }
+      ]
+    },
+    Vishz: {
+      name: "Vish'z Continent",
+      subtitle: "Richest Continent • Violent Climate Fluctuations",
+      desc: "The wealthiest landmass in the world, centered on Aurelia Capital and Gilded Mirage Lake, plagued by sudden blizzards, heatwaves, and tempest squalls.",
+      travelCost: 95,
+      travelWeeks: 3,
+      dungeons: [
+        { id: "vis_1", name: "Tempest Obsidian Sanctum", floors: 7, recLv: 9, baseHp: 245, rewardGold: 340, rewardXp: 480 },
+        { id: "vis_2", name: "Mirage Gold-Vein Labyrinth", floors: 9, recLv: 14, baseHp: 370, rewardGold: 520, rewardXp: 720 }
+      ]
+    },
+    Shawn: {
+      name: "Shawn Continent (The Dead Continent)",
+      subtitle: "Hottest • Lowest Population • ~96+ Forbidden Dungeons",
+      desc: "A scorching wasteland littered with corpses of animals, monsters, and travelers near Boiling Sulfur Lake. Exploring its ~96+ multiplying dungeons is forbidden by the Heroes' Law—yet desperate relic hunters still sneak in.",
+      travelCost: 120,
+      travelWeeks: 4,
+      dungeons: [
+        { id: "sha_1", name: "Forbidden Cinder Pit #14", floors: 8, recLv: 12, baseHp: 330, rewardGold: 450, rewardXp: 650 },
+        { id: "sha_2", name: "Sulfur Caldera Vault #79", floors: 10, recLv: 17, baseHp: 460, rewardGold: 680, rewardXp: 950 }
+      ]
+    },
+    Devilborn: {
+      name: "Devilborn Continent",
+      subtitle: "Largest Continent • Uninhabitable Devil Spawning Ground",
+      desc: "FORBIDDEN BY THE LAWS OF THE HEROES. Devils and monsters endlessly spawn here from an unknown source. Even legends exceeding Level 5000 cannot survive long on its soil.",
+      travelCost: 999999,
+      travelWeeks: 0,
+      dungeons: []
+    }
+  };
+
+  const STORY_ACTS = [
+    { act: 1, title: "Act I: Morning Roll-Out at Hanama", reqDodFloor: 5, desc: "Prove your party's discipline under the Heroes' Law by reaching Stratum II (Floor 6) of the Dungeon of Death and returning before nightfall." },
+    { act: 2, title: "Act II: Echoes of the God-Monster War", reqDodFloor: 11, desc: "Descend to Floor 12 where fallen divine shards empower the dungeon's guardians." },
+    { act: 3, title: "Act III: The Blind Auction Conspiracy", reqDodFloor: 17, desc: "Reach Floor 18 while rival Big 5 guilds maneuver around the Heroes' ban on Guild Wars." },
+    { act: 4, title: "Act IV: Whisper of the Devilborn Rift", reqDodFloor: 24, desc: "Push through Floor 25 as energy leaks from the sealed portal linking Hanama to the Devilborn Continent." },
+    { act: 5, title: "Act V: Throne of the Abyssal Sovereign", reqDodFloor: 30, desc: "Conquer Floor 30 of the Dungeon of Death without crossing the forbidden Devilborn portal." }
+  ];
+
+  // =========================================================
+  // 2. GAME STATE & SAVE ENGINE
+  // =========================================================
+  let selectedGuildId = "Hanmei";
+  let selectedClassId = "Fighter";
+  let deferredPrompt = null;
+  let state = null;
+
+  function makeArtifact(tier, special = null, customName = null) {
+    const pool = WEAPON_CATALOG.filter(w => w.tier === tier);
+    const chosen = customName || (pool[Math.floor(Math.random() * pool.length)]?.name || `${tier} Relic Blade`);
+    return {
+      id: "art_" + Math.random().toString(36).slice(2, 9),
+      name: chosen,
+      tier,
+      special,
+      equippedTo: null
+    };
+  }
+
+  function newGameState(heroName, guildId, classId) {
+    const guild = GUILDS.find(g => g.id === guildId) || GUILDS[0];
+    const pClass = CLASSES.find(c => c.id === classId) || CLASSES[0];
+
+    const partyPool = [
+      { name: "Lyra Thorne", classId: "Enchanter" },
+      { name: "Darius Krell", classId: "Tank" },
+      { name: "Sera Voss", classId: "Marksman" },
+      { name: "Rowan Ash", classId: "Mage" }
+    ].filter(m => m.classId !== classId).slice(0, 3);
+
+    const starterWep = makeArtifact("Normal", null, "Recruit's Guild Shortsword");
+    starterWep.equippedTo = "hero";
+
+    const allyWeps = partyPool.map((m, idx) => {
+      const w = makeArtifact("Normal");
+      w.equippedTo = "ally_" + idx;
+      return w;
+    });
+
+    const members = [
+      {
+        id: "hero",
+        name: heroName.trim() || "Kaelen Vance",
+        isHero: true,
+        classes: [pClass.id],
+        level: 1,
+        xp: 0,
+        hp: pClass.hp,
+        maxHp: pClass.hp,
+        alive: true
+      },
+      ...partyPool.map((m, idx) => {
+        const cObj = CLASSES.find(c => c.id === m.classId);
+        return {
+          id: "ally_" + idx,
+          name: m.name,
+          isHero: false,
+          classes: [cObj.id],
+          level: 1,
+          xp: 0,
+          hp: cObj.hp,
+          maxHp: cObj.hp,
+          alive: true
+        };
+      })
+    ];
+
+    return {
+      version: 2,
+      guildId: guild.id,
+      location: "Hanama",
+      gold: guild.startGold,
+      salvageCores: 1,
+      tagsRecovered: 0,
+      ageWeeks: 18 * 48, // 18 years * 12 months * 4 weeks
+      shiftStep: 0, // 0=Morning, 1=Midday, 2=Afternoon, 3=Dusk
+      dodMaxFloor: 1,
+      dodCheckpoint: 1,
+      mainCleared: false,
+      auctionWon: false,
+      honor: 10,
+      members,
+      inventory: [starterWep, ...allyWeps, makeArtifact("Basic", "Shiny", "Gleaming Surveyor's Dirk")],
+      combat: null,
+      logs: [
+        { text: `You swore the Guild Oath with ${guild.name} on Hanama Continent at Age 18y 0m 0w.`, cls: "c-gold" },
+        { text: `Heroes' Law Reminder: Parties of 4–5 from the same guild must enter dungeons in the morning and exit before Nightfall Roll Call.`, cls: "c-blue" }
+      ]
+    };
+  }
+
+  // Balanced Goldilocks XP Curve
+  function xpNeeded(level) {
+    return Math.floor(140 + level * 55 + Math.pow(level, 1.22) * 18);
+  }
+
+  function formatAge(totalWeeks) {
+    const years = Math.floor(totalWeeks / 48);
+    const rem = totalWeeks % 48;
+    const months = Math.floor(rem / 4);
+    const weeks = rem % 4;
+    return `${years}y ${months}m ${weeks}w`;
+  }
+
+  function shiftLabel(step) {
+    return ["Morning Roll-Out", "Midday", "Afternoon", "Dusk (Exit Soon!)"][Math.min(3, step)];
+  }
+
+  function addLog(text, cls = "") {
+    if (!state) return;
+    state.logs.unshift({ text, cls });
+    if (state.logs.length > 65) state.logs.pop();
+    renderLog();
+  }
+
+  // Artifact Synchronization % (Level 1 can equip Mythical, scales over time)
+  function calcSyncPercent(member, artifact) {
+    if (!artifact) return 0;
+    const tierIdx = TIERS.indexOf(artifact.tier);
+    const baseReq = [1, 2, 4, 7, 11, 16, 22, 28, 36][tierIdx] || 1;
+    const guildBonus = state.guildId === "Collector" ? 10 : 0;
+    const enchanterBonus = member.classes.includes("Enchanter") ? 12 : 0;
+    const shinyBonus = artifact.special === "Shiny" ? 8 : 0;
+    const raw = Math.round(Math.min(100, Math.max(6, (member.level / baseReq) * 58 + 14 + guildBonus + enchanterBonus + shinyBonus)));
+    return raw;
+  }
+
+  function getEquippedArtifact(memberId) {
+    return state.inventory.find(a => a.equippedTo === memberId) || null;
+  }
+
+  function calcMemberCombatStats(member) {
+    let atk = 0, def = 0;
+    member.classes.forEach((cid, i) => {
+      const c = CLASSES.find(x => x.id === cid) || CLASSES[0];
+      const weight = i === 0 ? 1 : 0.65;
+      atk += c.atk * weight;
+      def += c.def * weight;
+    });
+    atk += member.level * 3.4;
+    def += member.level * 1.8;
+
+    const art = getEquippedArtifact(member.id);
+    if (art) {
+      const sync = calcSyncPercent(member, art) / 100;
+      const basePwr = TIER_POWER[art.tier] || 8;
+      const spObj = SPECIAL_CASES.find(s => s.name === art.special);
+      const mult = spObj ? spObj.mult : 1;
+      atk += Math.round(basePwr * mult * sync);
+      def += Math.round(basePwr * 0.28 * sync);
+    }
+    return { atk: Math.round(atk), def: Math.round(def) };
+  }
+
+  function grantPartyXp(baseXp, sourceLabel) {
+    const guildMult = state.guildId === "Hanmei" && sourceLabel === "training" ? 1.12 : 1;
+    state.members.forEach(m => {
+      if (!m.alive) return;
+      const classPenalty = Math.max(0.4, 1 - (m.classes.length - 1) * 0.2);
+      const gained = Math.max(8, Math.round(baseXp * guildMult * classPenalty));
+      m.xp += gained;
+      while (m.xp >= xpNeeded(m.level)) {
+        m.xp -= xpNeeded(m.level);
+        m.level += 1;
+        const primary = CLASSES.find(c => c.id === m.classes[0]) || CLASSES[0];
+        m.maxHp += Math.round(primary.hp * 0.14 + 8);
+        m.hp = m.maxHp;
+        if (m.isHero) {
+          addLog(`🎉 LEVEL UP! ${m.name} reached Level ${m.level}!${m.level === 900 ? " (Solo Dungeon Law unlocked!)" : ""}`, "c-gold");
+        }
+      }
+    });
+  }
+
+  function advanceTime(weeks, shiftAdvance = 1) {
+    const hero = state.members[0];
+    const multiStrain = Math.max(0, hero.classes.length - 1);
+    state.ageWeeks += weeks + (weeks > 0 ? multiStrain : 0);
+    state.shiftStep = (state.shiftStep + shiftAdvance) % 4;
+  }
+
+  // =========================================================
+  // 3. SAVE / LOAD (LOCALSTORAGE + JSON BACKUP)
+  // =========================================================
+  function autoSave() {
+    if (!state) return;
+    try {
+      localStorage.setItem("six_continents_autosave", JSON.stringify(state));
+    } catch (e) {}
+  }
+
+  function saveToSlot(slotNum) {
+    if (!state) return;
+    try {
+      localStorage.setItem(`six_continents_slot_${slotNum}`, JSON.stringify({
+        savedAt: new Date().toLocaleString(),
+        heroName: state.members[0].name,
+        level: state.members[0].level,
+        guildId: state.guildId,
+        data: state
+      }));
+      addLog(`💾 Progress saved to Slot ${slotNum}.`, "c-green");
+      renderSaveModal();
+    } catch (e) {
+      addLog("Storage error while saving.", "c-red");
+    }
+  }
+
+  function loadFromSlot(slotNum) {
+    try {
+      const raw = localStorage.getItem(`six_continents_slot_${slotNum}`);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      state = parsed.data;
+      document.getElementById("modalBackdrop").classList.add("hidden");
+      enterGameUI();
+      addLog(`📂 Loaded Slot ${slotNum} (${parsed.heroName}, Lv ${parsed.level}).`, "c-blue");
+    } catch (e) {}
+  }
+
+  // =========================================================
+  // 4. RENDERING & UI CONTROLLERS
+  // =========================================================
+  function renderCreationScreen() {
+    const gWrap = document.getElementById("guildChoices");
+    gWrap.innerHTML = GUILDS.map(g => `
+      <div class="select-card ${g.id === selectedGuildId ? "active" : ""}" data-select-guild="${g.id}">
+        <div style="font-weight:700; color:var(--gold);">${g.name}</div>
+        <div style="font-size:0.78rem; color:var(--muted); margin:3px 0;">"${g.motto}"</div>
+        <div style="font-size:0.8rem; color:#86efac;">${g.bonus}</div>
+      </div>
+    `).join("");
+
+    const cWrap = document.getElementById("classChoices");
+    cWrap.innerHTML = CLASSES.map(c => `
+      <div class="select-card ${c.id === selectedClassId ? "active" : ""}" data-select-class="${c.id}">
+        <div style="font-weight:700;">${c.id}</div>
+        <div style="font-size:0.76rem; color:var(--muted);">${c.role}</div>
+        <div style="font-size:0.74rem; color:#93c5fd; margin-top:4px;">ATK ${c.atk} • DEF ${c.def} • HP ${c.hp}</div>
+      </div>
+    `).join("");
+  }
+
+  function enterGameUI() {
+    document.getElementById("screenCreate").classList.add("hidden");
+    document.getElementById("screenGame").classList.remove("hidden");
+    document.getElementById("hudPanel").classList.remove("hidden");
+    document.getElementById("bottomNav").classList.remove("hidden");
+    document.getElementById("btnSaveMenu").classList.remove("hidden");
+    renderAll();
+  }
+
+  function renderAll() {
+    if (!state) return;
+    renderHud();
+    renderMapInspector(state.location);
+    renderGuildTab();
+    renderDungeonTab();
+    renderArmoryTab();
+    renderForgeTab();
+    renderLog();
+    autoSave();
+  }
+
+  function renderHud() {
+    const hero = state.members[0];
+    const req = xpNeeded(hero.level);
+    const pct = Math.min(100, Math.round((hero.xp / req) * 100));
+    const aliveMembers = state.members.filter(m => m.alive);
+    const avgHp = aliveMembers.length
+      ? Math.round((aliveMembers.reduce((s, m) => s + m.hp / m.maxHp, 0) / aliveMembers.length) * 100)
+      : 0;
+
+    document.getElementById("hudIdentity").textContent = `${hero.name} (${state.guildId})`;
+    document.getElementById("hudLevel").textContent = `Lv ${hero.level} • ${hero.classes.join("/")}`;
+    document.getElementById("hudXpBar").style.width = `${pct}%`;
+    document.getElementById("hudAgeTime").textContent = `${formatAge(state.ageWeeks)} • ${shiftLabel(state.shiftStep)}`;
+    document.getElementById("hudLocGold").textContent = `${state.location} • ${state.gold}g`;
+    document.getElementById("hudHp").textContent = `${avgHp}% (${aliveMembers.length}/4 Alive)`;
+    document.getElementById("hudHpBar").style.width = `${avgHp}%`;
+    document.getElementById("tagsRecoveredBadge").textContent = `Guild Tags Recovered: ${state.tagsRecovered}`;
+  }
+
+  function renderLog() {
+    const box = document.getElementById("gameLog");
+    box.innerHTML = state.logs.map(l => `<div class="log-entry ${l.cls}">${l.text}</div>`).join("");
+  }
+
+  function renderMapInspector(locKey) {
+    const c = CONTINENTS[locKey] || CONTINENTS.Hanama;
+    const isHere = state.location === locKey;
+    const disc = state.guildId === "Royal Gilded" ? 0.85 : 1;
+    const cost = Math.round(c.travelCost * disc);
+
+    let actionHtml = "";
+    if (locKey === "Devilborn") {
+      actionHtml = `<span class="badge warn">⛔ Sealed by Heroes' Law — Even Level 5000+ legends perish here.</span>`;
+    } else if (isHere) {
+      actionHtml = `<span class="badge ok">📍 Party Currently Stationed Here</span>`;
+    } else {
+      actionHtml = `<button class="btn btn-gold btn-sm" data-travel="${locKey}" data-cost="${cost}" data-weeks="${c.travelWeeks}">⛵ Charter Sea Voyage (${cost}g • +${c.travelWeeks}w)</button>`;
+    }
+
+    document.getElementById("mapInspector").innerHTML = `
+      <div class="top-row">
+        <div>
+          <strong style="color:var(--gold); font-size:0.98rem;">${c.name}</strong>
+          <div style="font-size:0.78rem; color:#93c5fd;">${c.subtitle}</div>
+        </div>
+        ${actionHtml}
+      </div>
+      <p style="font-size:0.83rem; margin:8px 0 0 0; color:#dce2f0;">${c.desc}</p>
+    `;
+  }
+
+  function renderGuildTab() {
+    const g = GUILDS.find(x => x.id === state.guildId) || GUILDS[0];
+    const hero = state.members[0];
+    const art = getEquippedArtifact("hero");
+
+    document.getElementById("guildHallTitle").textContent = `${g.name} — Hanama Operations`;
+    let dynamicLine = g.quote;
+    if (art && (art.tier === "Legendary" || art.tier === "Mythical")) {
+      dynamicLine = `"By the Heroes' beard... a Level ${hero.level} carrying a ${art.tier} relic (${art.name})! Keep training so your body catches up to its divine weight."`;
+    } else if (art && art.special) {
+      dynamicLine = `"Careful with that ${art.special} ${art.name}, ${hero.name}. Special Case relics draw eyes from rival guilds."`;
+    } else if (hero.classes.length > 1) {
+      dynamicLine = `"Walking the path of ${hero.classes.join(" & ")} takes immense discipline, ${hero.name}. Remember the warning of aging to 76 at Level 56."`;
+    }
+    document.getElementById("guildDialogue").textContent = dynamicLine;
+
+    // Story Acts
+    const actsHtml = STORY_ACTS.map(a => {
+      const done = state.dodMaxFloor > a.reqDodFloor || (a.act === 5 && state.mainCleared);
+      return `
+        <div class="select-card" style="margin-bottom:8px; opacity:${done ? 0.72 : 1};">
+          <div class="top-row">
+            <strong>${a.title}</strong>
+            <span class="badge ${done ? "ok" : "warn"}">${done ? "✓ Completed" : `Goal: DoD Floor ${a.reqDodFloor}`}</span>
+          </div>
+          <div style="font-size:0.8rem; color:var(--muted); margin-top:4px;">${a.desc}</div>
+        </div>
+      `;
+    }).join("");
+    document.getElementById("storyActBox").innerHTML = actsHtml;
+
+    // Blind Dungeon Auction
+    const bidCost = Math.round(450 * (state.guildId === "Royal Gilded" ? 0.85 : 1));
+    document.getElementById("auctionBox").innerHTML = state.auctionWon
+      ? `<span class="badge ok">✓ Your guild won the Sunken Gilded Vault deed via Blind Auction! (+15% Gold from all dungeons)</span>`
+      : `<div class="top-row">
+          <div style="font-size:0.82rem;">Scouted Floors 1–5 (Top to Middle). Bottom half unknown!</div>
+          <button id="btnBidAuction" class="btn btn-gold btn-sm">Place Winning Bid (${bidCost}g)</button>
+         </div>`;
+
+    // Multiclass Registry
+    document.getElementById("multiclassBox").innerHTML = CLASSES.map(c => {
+      const has = hero.classes.includes(c.id);
+      return `
+        <div class="select-card ${has ? "active" : ""}">
+          <div class="top-row">
+            <strong>${c.id}</strong>
+            ${has
+              ? `<span class="badge ok">Active</span>`
+              : `<button class="btn btn-sm add-class-btn" data-add-class="${c.id}">Add (120g)</button>`}
+          </div>
+          <div style="font-size:0.75rem; color:var(--muted); margin-top:3px;">${c.role}</div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function renderDungeonTab() {
+    const lobby = document.getElementById("dungeonLobby");
+    const combat = document.getElementById("dungeonCombat");
+
+    if (state.combat) {
+      lobby.classList.add("hidden");
+      combat.classList.remove("hidden");
+      renderCombatView();
+      return;
+    }
+
+    lobby.classList.remove("hidden");
+    combat.classList.add("hidden");
+
+    const hero = state.members[0];
+    const canEnterDod = state.location === "Hanama";
+    const checkpoints = [1, 6, 11, 16, 21, 26].filter(cp => cp <= state.dodCheckpoint);
+
+    document.getElementById("dodEntryCard").innerHTML = `
+      <div class="top-row">
+        <div>
+          <strong style="color:var(--gold); font-size:0.98rem;">☠ Dungeon of Death (Hanama • 30 Floors)</strong>
+          <div style="font-size:0.78rem; color:var(--muted);">Unclaimed by any guild • Deepest Reached: Floor ${state.dodMaxFloor}/30 ${state.mainCleared ? "• CONQUERED" : ""}</div>
+        </div>
+        ${canEnterDod
+          ? `<div style="display:flex; gap:5px; flex-wrap:wrap;">
+              ${checkpoints.map(cp => `<button class="btn btn-crimson btn-sm start-dod" data-floor="${cp}">Enter Floor ${cp}</button>`).join("")}
+             </div>`
+          : `<span class="badge warn">Travel to Hanama to Enter</span>`}
+      </div>
+      <div style="font-size:0.76rem; color:#93c5fd; margin-top:5px;">
+        Party Rule: ${hero.level >= 900 ? "Level 900+ Solo Law Eligible" : "4-Member Same-Guild Party Required"}
+      </div>
+    `;
+
+    const cont = CONTINENTS[state.location] || CONTINENTS.Hanama;
+    document.getElementById("sideDungeonCont").textContent = cont.name;
+    document.getElementById("sideDungeonsList").innerHTML = cont.dungeons.map(d => `
+      <div class="select-card">
+        <div style="font-weight:700;">${d.name} (${d.floors} Floors)</div>
+        <div style="font-size:0.76rem; color:var(--muted); margin:3px 0;">Recommended Lv ${d.recLv}+ • Clear Bonus: ${d.rewardGold}g & ${d.rewardXp} XP</div>
+        <button class="btn btn-gold btn-sm start-side" data-did="${d.id}">Morning Roll-Out</button>
+      </div>
+    `).join("");
+  }
+
+  function renderCombatView() {
+    const c = state.combat;
+    document.getElementById("combatTitle").textContent = `${c.name} — Floor ${c.floor}/${c.maxFloors} (Wave ${c.wave})`;
+    document.getElementById("combatShiftBadge").textContent = shiftLabel(state.shiftStep);
+    document.getElementById("combatSub").textContent = `Loot Pool (Equal Party Split): ${c.lootGold}g • ${c.lootXp} XP`;
+
+    document.getElementById("monsterList").innerHTML = c.monsters.map(m => {
+      const pct = Math.max(0, Math.round((m.hp / m.maxHp) * 100));
+      return `
+        <div class="monster-card">
+          <div class="top-row">
+            <strong>${m.name}</strong>
+            <span style="font-size:0.8rem; color:#fca5a5; font-weight:700;">HP: ${m.hp} / ${m.maxHp}</span>
+          </div>
+          <div class="bar-wrap"><div class="bar-fill bar-hp" style="width:${pct}%"></div></div>
+        </div>
+      `;
+    }).join("");
+
+    const decBox = document.getElementById("floorDecisionBox");
+    const ctrlBox = document.getElementById("combatControls");
+    if (c.awaitingDecision) {
+      decBox.classList.remove("hidden");
+      ctrlBox.classList.add("hidden");
+      document.getElementById("btnDecideDeeper").disabled = c.floor >= c.maxFloors;
+      document.getElementById("decisionPromptText").textContent = c.floor >= c.maxFloors
+        ? "You have reached the deepest floor of this expedition! Fall back to collect your completion rewards before Nightfall Roll Call."
+        : `Floor ${c.floor} wave defeated! Descend deeper toward Floor ${c.floor + 1} for stronger monsters and richer relics, farm weaker monsters here, or fall back before Nightfall Roll Call.`;
+    } else {
+      decBox.classList.add("hidden");
+      ctrlBox.classList.remove("hidden");
+    }
+  }
+
+  function renderArmoryTab() {
+    document.getElementById("partyCards").innerHTML = state.members.map(m => {
+      const art = getEquippedArtifact(m.id);
+      const sync = art ? calcSyncPercent(m, art) : 0;
+      const stats = calcMemberCombatStats(m);
+      const hpPct = Math.max(0, Math.round((m.hp / m.maxHp) * 100));
+      return `
+        <div class="select-card">
+          <div class="top-row">
+            <strong>${m.name} ${m.isHero ? "(You)" : ""}</strong>
+            <span class="badge ${m.alive ? "ok" : "warn"}">${m.alive ? `Lv ${m.level}` : "Fallen (Tag Held)"}</span>
+          </div>
+          <div style="font-size:0.76rem; color:#93c5fd;">${m.classes.join(" / ")} • ATK ${stats.atk} • DEF ${stats.def}</div>
+          <div style="font-size:0.76rem; margin-top:4px;">HP: ${m.hp}/${m.maxHp}</div>
+          <div class="bar-wrap"><div class="bar-fill bar-hp" style="width:${hpPct}%"></div></div>
+          <div style="margin-top:7px; font-size:0.78rem;">
+            ${art
+              ? `<div>Equipped: <strong>${art.name}</strong></div>
+                 <div style="margin-top:2px;">
+                   <span class="pill t-${art.tier.replace(/[^a-zA-Z]/g, "")}">${art.tier}</span>
+                   ${art.special ? `<span class="pill sp-${art.special}">${art.special}</span>` : ""}
+                   <span style="color:#60a5fa; font-weight:700;">Sync: ${sync}%</span>
+                 </div>
+                 <div class="bar-wrap"><div class="bar-fill bar-sync" style="width:${sync}%"></div></div>`
+              : `<span style="color:var(--muted);">No artifact equipped</span>`}
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    document.getElementById("invCount").textContent = state.inventory.length;
+    document.getElementById("inventoryList").innerHTML = state.inventory.map(art => {
+      const holder = art.equippedTo ? state.members.find(m => m.id === art.equippedTo) : null;
+      return `
+        <div class="select-card">
+          <div style="font-weight:700; font-size:0.88rem;">${art.name}</div>
+          <div style="margin:4px 0;">
+            <span class="pill t-${art.tier.replace(/[^a-zA-Z]/g, "")}">${art.tier}</span>
+            ${art.special ? `<span class="pill sp-${art.special}">${art.special}</span>` : ""}
+          </div>
+          <div style="font-size:0.75rem; color:var(--muted); margin-bottom:6px;">
+            ${holder ? `Equipped by ${holder.name}` : "In Guild Vault"}
+          </div>
+          <div style="display:flex; gap:4px; flex-wrap:wrap;">
+            ${state.members.map(m => `
+              <button class="btn btn-sm equip-btn" data-art="${art.id}" data-member="${m.id}">
+                ${art.equippedTo === m.id ? "✓ " : ""}${m.name.split(" ")[0]}
+              </button>
+            `).join("")}
+            ${!holder && art.tier !== "Mythical"
+              ? `<button class="btn btn-sm sell-btn" data-art="${art.id}">Sell (${Math.round(TIER_POWER[art.tier] * (art.special ? 2.5 : 1.1))}g)</button>`
+              : ""}
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  function renderForgeTab() {
+    document.getElementById("salvageCount").textContent = state.salvageCores;
+    const unequipped = state.inventory.filter(a => !a.equippedTo);
+    const opts = unequipped.length
+      ? unequipped.map(a => `<option value="${a.id}">${a.name} [${a.tier}${a.special ? " • " + a.special : ""}]</option>`).join("")
+      : `<option value="">Need at least 2 unequipped artifacts</option>`;
+    document.getElementById("fuseSelectA").innerHTML = opts;
+    document.getElementById("fuseSelectB").innerHTML = opts;
+    if (unequipped.length > 1) {
+      document.getElementById("fuseSelectB").selectedIndex = 1;
+    }
+  }
+
+  // =========================================================
+  // 5. DUNGEON & COMBAT MECHANICS
+  // =========================================================
+  function startDungeonRun(type, idOrFloor) {
+    // Revive/heal check
+    if (!state.members[0].alive) {
+      addLog("Rest at the Guild Hall to recover before entering a dungeon.", "c-red");
+      return;
+    }
+    state.shiftStep = 0; // Morning Roll-Out
+    if (type === "dod") {
+      const startFloor = Number(idOrFloor) || 1;
+      state.combat = {
+        type: "dod",
+        name: "Dungeon of Death",
+        floor: startFloor,
+        maxFloors: 30,
+        wave: 1,
+        baseHp: 85 + startFloor * 28,
+        lootGold: 0,
+        lootXp: 0,
+        awaitingDecision: false,
+        monsters: []
+      };
+    } else {
+      const cont = CONTINENTS[state.location];
+      const d = cont.dungeons.find(x => x.id === idOrFloor);
+      if (!d) return;
+      state.combat = {
+        type: "side",
+        sideObj: d,
+        name: d.name,
+        floor: 1,
+        maxFloors: d.floors,
+        wave: 1,
+        baseHp: d.baseHp,
+        lootGold: 0,
+        lootXp: 0,
+        awaitingDecision: false,
+        monsters: []
+      };
+    }
+    spawnMonsterWave();
+    addLog(`🌅 Morning Roll-Out complete! Entered ${state.combat.name} on Floor ${state.combat.floor}.`, "c-gold");
+    renderAll();
+  }
+
+  function spawnMonsterWave() {
+    const c = state.combat;
+    const count = Math.min(4, 1 + Math.floor((c.floor + c.wave) / 3));
+    const names = [
+      "Abyssal Stalker", "Headless Iron-Spear Fiend", "Cinder-Bone Hound",
+      "Rift-Touched Gargoyle", "Dread Knight of the Maw", "Blighted Chimera"
+    ];
+    c.monsters = [];
+    for (let i = 0; i < count; i++) {
+      const scale = 1 + (c.floor - 1) * 0.22 + (c.wave - 1) * 0.16;
+      const maxHp = Math.round(c.baseHp * scale * (0.9 + Math.random() * 0.25));
+      const mName = c.floor === 30 && c.type === "dod" && i === 0
+        ? "Abyssal Sovereign of the Sealed Rift"
+        : `${names[(c.floor + i) % names.length]} #${i + 1}`;
+      c.monsters.push({ name: mName, hp: maxHp, maxHp });
+    }
+    c.awaitingDecision = false;
+  }
+
+  function executeCombatRound(useSkill) {
+    const c = state.combat;
+    if (!c || c.awaitingDecision) return;
+
+    const aliveAllies = state.members.filter(m => m.alive);
+    if (!aliveAllies.length) return;
+
+    // Party attacks
+    let totalDmg = 0;
+    aliveAllies.forEach(m => {
+      const st = calcMemberCombatStats(m);
+      const mult = useSkill ? (state.guildId === "Gaze" ? 1.55 : 1.38) : 1.0;
+      totalDmg += Math.round(st.atk * mult * (0.9 + Math.random() * 0.25));
+    });
+
+    // Distribute damage across live monsters
+    let remDmg = totalDmg;
+    c.monsters.forEach(mon => {
+      if (mon.hp > 0 && remDmg > 0) {
+        const hit = Math.min(mon.hp, remDmg);
+        mon.hp -= hit;
+        remDmg -= hit;
+      }
+    });
+
+    addLog(`⚔️ Your party unleashes ${useSkill ? "Coordinated Class Arts" : "an assault"} for ${totalDmg} total damage!`, "c-blue");
+
+    // Check if all monsters defeated
+    if (c.monsters.every(m => m.hp <= 0)) {
+      const goldGain = Math.round((28 + c.floor * 14 + c.wave * 9) * (state.auctionWon ? 1.15 : 1));
+      const xpGain = Math.round(45 + c.floor * 24 + c.wave * 14);
+      c.lootGold += goldGain;
+      c.lootXp += xpGain;
+      c.awaitingDecision = true;
+
+      // Chance for monster salvage or artifact drop
+      if (Math.random() < 0.38) {
+        state.salvageCores += state.guildId === "Collector" ? 2 : 1;
+        addLog(`🦴 Recovered Monster Salvage Core(s) from the slain fiends!`, "c-purple");
+      }
+      if (Math.random() < 0.22 + c.floor * 0.01) {
+        const tierIdx = Math.min(TIERS.length - 1, Math.floor(c.floor / 4));
+        const spRoll = Math.random() < (state.guildId === "Four Leaf" ? 0.24 : 0.14)
+          ? SPECIAL_CASES[Math.floor(Math.random() * SPECIAL_CASES.length)].name
+          : null;
+        const drop = makeArtifact(TIERS[tierIdx], spRoll);
+        state.inventory.push(drop);
+        addLog(`✨ Relic Discovered (Equal Party Split): ${drop.name} [${drop.tier}${drop.special ? " • " + drop.special : ""}]!`, "c-gold");
+      }
+
+      if (c.type === "dod") {
+        state.dodMaxFloor = Math.max(state.dodMaxFloor, c.floor);
+        if (c.floor >= 26) state.dodCheckpoint = Math.max(state.dodCheckpoint, 26);
+        else if (c.floor >= 21) state.dodCheckpoint = Math.max(state.dodCheckpoint, 21);
+        else if (c.floor >= 16) state.dodCheckpoint = Math.max(state.dodCheckpoint, 16);
+        else if (c.floor >= 11) state.dodCheckpoint = Math.max(state.dodCheckpoint, 11);
+        else if (c.floor >= 6) state.dodCheckpoint = Math.max(state.dodCheckpoint, 6);
+      }
+
+      renderAll();
+      return;
+    }
+
+    // Surviving monsters counter-attack
+    const liveMons = c.monsters.filter(m => m.hp > 0);
+    const enemyPower = Math.round(liveMons.length * (10 + c.floor * 5.2));
+    const target = aliveAllies[Math.floor(Math.random() * aliveAllies.length)];
+    const tStats = calcMemberCombatStats(target);
+    const taken = Math.max(4, enemyPower - Math.round(tStats.def * 0.45));
+    target.hp = Math.max(0, target.hp - taken);
+    addLog(`🩸 ${liveMons[0].name} strikes ${target.name} for ${taken} damage!`, "c-red");
+
+    if (target.hp === 0) {
+      target.alive = false;
+      if (target.isHero) {
+        addLog(`💀 You fell on Floor ${c.floor}! Emergency rescue squad extracted your Guild Tag before Nightfall Roll Call.`, "c-red");
+        state.combat = null;
+        advanceTime(2, 3);
+        state.members.forEach(m => { m.alive = true; m.hp = Math.round(m.maxHp * 0.5); });
+      } else {
+        state.tagsRecovered += 1;
+        addLog(`🏷️ ${target.name} fell! Under the Heroes' Law, you secured their Guild Tag and must report for mandatory investigation at exit.`, "c-red");
+      }
+    }
+
+    renderAll();
+  }
+
+  function finishDungeonRun() {
+    const c = state.combat;
+    if (!c) return;
+    const allAlive = state.members.every(m => m.alive);
+    const survivalBonus = allAlive
+      ? Math.round(c.lootGold * (state.guildId === "Four Leaf" ? 0.35 : 0.2))
+      : 0;
+
+    let sideClearGold = 0, sideClearXp = 0;
+    if (c.type === "side" && c.floor >= c.maxFloors && c.awaitingDecision) {
+      sideClearGold = c.sideObj.rewardGold;
+      sideClearXp = c.sideObj.rewardXp;
+      addLog(`🏆 Cleared ${c.name}! Earned full dungeon clear bounty (${sideClearGold}g & ${sideClearXp} XP).`, "c-gold");
+    }
+
+    const totalGold = c.lootGold + survivalBonus + sideClearGold;
+    const totalXp = c.lootXp + sideClearXp;
+    state.gold += totalGold;
+    grantPartyXp(totalXp, "dungeon");
+    advanceTime(1, 3);
+
+    if (allAlive) {
+      addLog(`🏁 Exited before Nightfall Roll Call with full party alive! Earned ${totalGold}g (incl. ${survivalBonus}g Survival Bonus) and ${totalXp} XP.`, "c-green");
+    } else {
+      addLog(`⚖️ Exited before Nightfall Roll Call and submitted fallen Guild Tag(s) for mandatory Guild investigation. Earned ${totalGold}g & ${totalXp} XP.`, "c-blue");
+      state.members.forEach(m => { m.alive = true; m.hp = Math.round(m.maxHp * 0.65); });
+    }
+
+    // Check Main Story Victory (Floor 30 of Dungeon of Death)
+    if (c.type === "dod" && c.floor >= 30 && c.awaitingDecision && !state.mainCleared) {
+      state.mainCleared = true;
+      state.combat = null;
+      renderAll();
+      showVictoryModal();
+      return;
+    }
+
+    state.combat = null;
+    renderAll();
+  }
+
+  function showVictoryModal() {
+    const hero = state.members[0];
+    const art = getEquippedArtifact("hero");
+    openModal(
+      "👑 DUNGEON OF DEATH CONQUERED!",
+      `<p>At <strong>Age ${formatAge(state.ageWeeks)}</strong> and <strong>Level ${hero.level}</strong>, <strong>${hero.name}</strong> and your ${state.guildId} party defeated the Abyssal Sovereign on Floor 30—sealing the rift before the forbidden Devilborn portal while upholding the Laws of the Heroes.</p>
+       <div class="select-card" style="margin:10px 0;">
+         <div><strong>Guild:</strong> ${state.guildId}</div>
+         <div><strong>Classes:</strong> ${hero.classes.join(" / ")}</div>
+         <div><strong>Primary Relic:</strong> ${art ? `${art.name} (${art.tier}${art.special ? " • " + art.special : ""}) — ${calcSyncPercent(hero, art)}% Sync` : "Unarmed"}</div>
+         <div><strong>Guild Tags Recovered:</strong> ${state.tagsRecovered}</div>
+       </div>
+       <p class="sub">You may continue exploring all six continents, forging Mythical artifacts, and clearing side dungeons in Sandbox Free-Roam!</p>`
+    );
+  }
+
+  // =========================================================
+  // 6. MODALS & PWA INSTALL HANDLERS
+  // =========================================================
+  function openModal(title, html) {
+    document.getElementById("modalTitle").textContent = title;
+    document.getElementById("modalBody").innerHTML = html;
+    document.getElementById("modalBackdrop").classList.remove("hidden");
+  }
+
+  function renderSaveModal() {
+    const slotsHtml = [1, 2, 3].map(s => {
+      const raw = localStorage.getItem(`six_continents_slot_${s}`);
+      const info = raw ? JSON.parse(raw) : null;
+      return `
+        <div class="select-card" style="margin-bottom:8px;">
+          <div class="top-row">
+            <div>
+              <strong>Slot ${s}</strong>
+              <div style="font-size:0.76rem; color:var(--muted);">
+                ${info ? `${info.heroName} • Lv ${info.level} (${info.guildId}) — ${info.savedAt}` : "Empty Slot"}
+              </div>
+            </div>
+            <div style="display:flex; gap:5px;">
+              <button class="btn btn-gold btn-sm save-slot-btn" data-slot="${s}">Save</button>
+              ${info ? `<button class="btn btn-sm load-slot-btn" data-slot="${s}">Load</button>` : ""}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    openModal("💾 Save & Backup Manager", `
+      ${slotsHtml}
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:10px;">
+        <button id="btnExportJson" class="btn btn-sm">⬇ Export Save File (.json)</button>
+        <button id="btnNewRunReset" class="btn btn-crimson btn-sm">🔄 Start New Character</button>
+      </div>
+    `);
+  }
+
+  // =========================================================
+  // 7. EVENT DELEGATION & SERVICE WORKER REGISTRATION
+  // =========================================================
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("button, .select-card, .map-node");
+    if (!t) return;
+
+    if (t.dataset.selectGuild) {
+      selectedGuildId = t.dataset.selectGuild;
+      renderCreationScreen();
+    } else if (t.dataset.selectClass) {
+      selectedClassId = t.dataset.selectClass;
+      renderCreationScreen();
+    } else if (t.id === "btnStartAdventure") {
+      const name = document.getElementById("inputHeroName").value;
+      state = newGameState(name, selectedGuildId, selectedClassId);
+      enterGameUI();
+    } else if (t.classList.contains("nav-btn")) {
+      document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+      t.classList.add("active");
+      const tabId = t.dataset.tab;
+      document.querySelectorAll(".tab-view").forEach(v => v.classList.add("hidden"));
+      document.getElementById(tabId).classList.remove("hidden");
+    } else if (t.classList.contains("map-filter")) {
+      document.querySelectorAll(".map-filter").forEach(b => b.classList.remove("active"));
+      t.classList.add("active");
+      const f = t.dataset.filter;
+      document.querySelectorAll(".layer-continent, .layer-water, .layer-settlement").forEach(el => {
+        el.style.display = (f === "all" || el.classList.contains("layer-" + f)) ? "" : "none";
+      });
+    } else if (t.classList.contains("map-node")) {
+      renderMapInspector(t.dataset.loc);
+    } else if (t.dataset.travel) {
+      const dest = t.dataset.travel;
+      const cost = Number(t.dataset.cost);
+      const weeks = Number(t.dataset.weeks);
+      if (state.gold < cost) {
+        addLog(`Not enough gold (${cost}g required) to charter a voyage to ${dest}.`, "c-red");
+        return;
+      }
+      state.gold -= cost;
+      state.location = dest;
+      advanceTime(weeks, 1);
+      addLog(`⛵ Sailed across the seas to ${CONTINENTS[dest].name} (-${cost}g, +${weeks}w).`, "c-blue");
+      renderAll();
+    } else if (t.id === "btnActionTrain") {
+      advanceTime(1, 1);
+      grantPartyXp(55 + state.members[0].level * 12, "training");
+      addLog("⚔️ Completed intensive guild courtyard training (+1w).", "c-green");
+      renderAll();
+    } else if (t.id === "btnActionHelp") {
+      advanceTime(1, 1);
+      const pay = 30 + state.members[0].level * 6;
+      state.gold += pay;
+      grantPartyXp(45 + state.members[0].level * 10, "help");
+      addLog(`🤝 Aided local villagers and escorts (+${pay}g, +1w).`, "c-green");
+      renderAll();
+    } else if (t.id === "btnActionRest") {
+      advanceTime(1, 0);
+      state.shiftStep = 0;
+      state.members.forEach(m => { m.alive = true; m.hp = m.maxHp; });
+      addLog("⛺ Party rested at the Guild barracks and prepared for Morning Roll-Out.", "c-blue");
+      renderAll();
+    } else if (t.id === "btnBidAuction") {
+      const bidCost = Math.round(450 * (state.guildId === "Royal Gilded" ? 0.85 : 1));
+      if (state.gold < bidCost) {
+        addLog(`Need ${bidCost}g to outbid rival Big 5 guilds at the auction.`, "c-red");
+        return;
+      }
+      state.gold -= bidCost;
+      state.auctionWon = true;
+      addLog("🏛️ Won the Blind Dungeon Auction under the Heroes' Charter! (+15% dungeon gold)", "c-gold");
+      renderAll();
+    } else if (t.dataset.addClass) {
+      if (state.gold < 120) {
+        addLog("Need 120g for Receptionist class registry paperwork.", "c-red");
+        return;
+      }
+      state.gold -= 120;
+      state.members[0].classes.push(t.dataset.addClass);
+      addLog(`📜 Registered secondary class: ${t.dataset.addClass}. Focus is now split across ${state.members[0].classes.length} classes.`, "c-purple");
+      renderAll();
+    } else if (t.classList.contains("start-dod")) {
+      startDungeonRun("dod", t.dataset.floor);
+    } else if (t.classList.contains("start-side")) {
+      startDungeonRun("side", t.dataset.did);
+    } else if (t.id === "btnAttackWave") {
+      executeCombatRound(false);
+    } else if (t.id === "btnSkillWave") {
+      executeCombatRound(true);
+    } else if (t.id === "btnRetreatEarly" || t.id === "btnDecideExit") {
+      finishDungeonRun();
+    } else if (t.id === "btnDecideDeeper") {
+      state.combat.floor += 1;
+      state.combat.wave = 1;
+      state.shiftStep = Math.min(3, state.shiftStep + 1);
+      spawnMonsterWave();
+      addLog(`⬇ Descended deeper to Floor ${state.combat.floor}! Monsters grow stronger.`, "c-gold");
+      renderAll();
+    } else if (t.id === "btnDecideFarm") {
+      state.combat.wave += 1;
+      state.shiftStep = Math.min(3, state.shiftStep + 1);
+      spawnMonsterWave();
+      addLog(`🔄 Stayed on Floor ${state.combat.floor} to hunt reinforcement wave #${state.combat.wave}.`, "c-blue");
+      renderAll();
+    } else if (t.classList.contains("equip-btn")) {
+      const art = state.inventory.find(a => a.id === t.dataset.art);
+      const memId = t.dataset.member;
+      if (!art) return;
+      state.inventory.forEach(a => { if (a.equippedTo === memId) a.equippedTo = null; });
+      art.equippedTo = memId;
+      renderAll();
+    } else if (t.classList.contains("sell-btn")) {
+      const idx = state.inventory.findIndex(a => a.id === t.dataset.art);
+      if (idx === -1) return;
+      const art = state.inventory[idx];
+      const val = Math.round(TIER_POWER[art.tier] * (art.special ? 2.5 : 1.1));
+      state.gold += val;
+      state.inventory.splice(idx, 1);
+      addLog(`💰 Sold ${art.name} to the Guild Treasurer for ${val}g.`, "c-gold");
+      renderAll();
+    } else if (t.classList.contains("forge-craft")) {
+      const cost = Number(t.dataset.cost);
+      const tier = t.dataset.tier;
+      if (state.gold < cost) {
+        addLog(`Need ${cost}g to commission a ${tier} blade.`, "c-red");
+        return;
+      }
+      state.gold -= cost;
+      const forged = makeArtifact(tier);
+      state.inventory.push(forged);
+      addLog(`🔨 Guild Weaponsmith forged ${forged.name} [${tier}]!`, "c-green");
+      renderAll();
+    } else if (t.id === "btnReforgeSalvage") {
+      if (state.salvageCores < 2 || state.gold < 150) {
+        addLog("Requires 2 Monster Salvage Cores and 150g.", "c-red");
+        return;
+      }
+      state.salvageCores -= 2;
+      state.gold -= 150;
+      const tier = TIERS[Math.min(6, 3 + Math.floor(Math.random() * 3))];
+      const relic = makeArtifact(tier);
+      state.inventory.push(relic);
+      addLog(`🦴 Reforged monster remains into ${relic.name} [${relic.tier}]!`, "c-gold");
+      renderAll();
+    } else if (t.id === "btnFuseArtifacts") {
+      const idA = document.getElementById("fuseSelectA").value;
+      const idB = document.getElementById("fuseSelectB").value;
+      if (!idA || !idB || idA === idB) {
+        addLog("Select two distinct unequipped artifacts to fuse.", "c-red");
+        return;
+      }
+      if (state.gold < 200) {
+        addLog("Weaponsmith fusion requires 200g.", "c-red");
+        return;
+      }
+      const artA = state.inventory.find(a => a.id === idA);
+      const artB = state.inventory.find(a => a.id === idB);
+      if (!artA || !artB) return;
+
+      state.gold -= 200;
+      const idxA = TIERS.indexOf(artA.tier);
+      const idxB = TIERS.indexOf(artB.tier);
+      const minIdx = Math.min(idxA, idxB);
+      const maxIdx = Math.max(idxA, idxB);
+
+      let outTierIdx = maxIdx;
+      let outSpecial = artA.special || artB.special || null;
+
+      // Two Legendaries -> Special Case or Mythical
+      if (idxA === 7 && idxB === 7) {
+        if (Math.random() < 0.5) {
+          outTierIdx = 8; // Mythical
+        } else {
+          outTierIdx = 7;
+          outSpecial = SPECIAL_CASES[Math.floor(Math.random() * SPECIAL_CASES.length)].name;
+        }
+      } else {
+        // Never goes less than the combined inputs
+        outTierIdx = Math.min(TIERS.length - 1, Math.max(minIdx, maxIdx + (Math.random() < 0.55 ? 1 : 0)));
+        if (!outSpecial && Math.random() < 0.25) {
+          outSpecial = SPECIAL_CASES[Math.floor(Math.random() * SPECIAL_CASES.length)].name;
+        }
+      }
+
+      state.inventory = state.inventory.filter(a => a.id !== idA && a.id !== idB);
+      const fused = makeArtifact(TIERS[outTierIdx], outSpecial);
+      state.inventory.push(fused);
+      addLog(`🔥 FUSION SUCCESS! Created ${fused.name} [${fused.tier}${fused.special ? " • " + fused.special : ""}]!`, "c-gold");
+      renderAll();
+    } else if (t.id === "btnSaveMenu") {
+      renderSaveModal();
+    } else if (t.classList.contains("save-slot-btn")) {
+      saveToSlot(t.dataset.slot);
+    } else if (t.classList.contains("load-slot-btn")) {
+      loadFromSlot(t.dataset.slot);
+    } else if (t.id === "btnExportJson") {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "six_continents_save.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    } else if (t.id === "btnNewRunReset") {
+      localStorage.removeItem("six_continents_autosave");
+      location.reload();
+    } else if (t.id === "btnPwaHelp") {
+      openModal("📱 Install as an Offline App (PWA)", `
+        <p><strong>Chronicles of the Six Continents</strong> is configured as an installable Progressive Web App with offline caching.</p>
+        <ul style="padding-left:18px; font-size:0.85rem; color:#dce2f0;">
+          <li><strong>Android (Chrome):</strong> Tap the gold <em>Install App</em> button in the header, or open browser menu (⋮) → <em>Install app</em> / <em>Add to Home screen</em>.</li>
+          <li><strong>iPhone / iPad (Safari):</strong> Tap the <em>Share</em> icon → <em>Add to Home Screen</em>.</li>
+          <li><strong>Offline Play:</strong> Once loaded once over HTTPS, all game code, maps, and local saves work completely without internet.</li>
+        </ul>
+      `);
+    } else if (t.id === "btnCloseModal") {
+      document.getElementById("modalBackdrop").classList.add("hidden");
+    } else if (t.id === "btnInstallPwa" && deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.finally(() => {
+        deferredPrompt = null;
+        document.getElementById("btnInstallPwa").classList.add("hidden");
+      });
+    }
+  });
+
+  // PWA Service Worker & Online/Offline Status
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById("btnInstallPwa").classList.remove("hidden");
+  });
+
+  function updateNetworkBadge() {
+    const b = document.getElementById("offlineBadge");
+    if (navigator.onLine) {
+      b.textContent = "● Offline Ready";
+      b.className = "badge ok";
+    } else {
+      b.textContent = "⚡ Offline Mode";
+      b.className = "badge warn";
+    }
+  }
+  window.addEventListener("online", updateNetworkBadge);
+  window.addEventListener("offline", updateNetworkBadge);
+
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.protocol === "http:")) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+    });
+  }
+
+  // Boot: Check autosave or render creation
+  renderCreationScreen();
+  updateNetworkBadge();
+  try {
+    const autoRaw = localStorage.getItem("six_continents_autosave");
+    if (autoRaw) {
+      state = JSON.parse(autoRaw);
+      enterGameUI();
+    }
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>
